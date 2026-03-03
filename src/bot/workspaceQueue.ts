@@ -22,6 +22,11 @@ export class WorkspaceQueue {
             } catch (err: any) {
                 logger.error('[WorkspaceQueue] task error:', err?.message || err);
             }
+        }).finally(() => {
+            // Clean up if this is still the latest promise in the chain
+            if (this.queues.get(workspacePath) === next) {
+                this.queues.delete(workspacePath);
+            }
         });
         this.queues.set(workspacePath, next);
         return next;

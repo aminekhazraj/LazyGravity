@@ -48,7 +48,7 @@ export function buildSessionPickerPayload(
         return { richContent: rc, components: [] };
     }
 
-    rc = withDescription(rc, t(`Select a session to join (${sessions.length} found)`));
+    rc = withDescription(rc, t('Select a session to join ({{count}} found)', { count: sessions.length }));
 
     const pageItems = sessions.slice(0, MAX_OPTIONS);
 
@@ -92,7 +92,7 @@ export function buildSessionPickerUI(
         return { embeds: [embed], components: [] };
     }
 
-    embed.setDescription(t(`Select a session to join (${sessions.length} found)`));
+    embed.setDescription(t('Select a session to join ({{count}} found)', { count: sessions.length }));
 
     const pageItems = sessions.slice(0, MAX_SELECT_OPTIONS);
 

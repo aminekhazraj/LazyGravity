@@ -945,10 +945,16 @@ export const startBot = async (cliLogLevel?: LogLevel) => {
     const slashCommandHandler = new SlashCommandHandler(templateRepo);
 
     // Discord platform — only initialise the Discord client when the platform is enabled
-    if (config.platforms.includes('discord')) {
+    if (config.platforms.includes('discord') && !config.discordToken) {
+        logger.error('Discord platform enabled but discordToken is missing. Skipping Discord initialization.');
+    }
+    if (config.platforms.includes('discord') && !config.clientId) {
+        logger.error('Discord platform enabled but clientId is missing. Skipping Discord initialization.');
+    }
+    if (config.platforms.includes('discord') && config.discordToken && config.clientId) {
 
-    const discordToken = config.discordToken!;
-    const discordClientId = config.clientId!;
+    const discordToken = config.discordToken;
+    const discordClientId = config.clientId;
 
     const client = new Client({
         intents: [

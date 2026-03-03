@@ -100,6 +100,14 @@ function toDiscordComponents(
     rows: readonly ComponentRow[],
 ): ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[] {
     return rows.map((row) => {
+        const hasButton = row.components.some((c) => c.type === 'button');
+        const hasSelect = row.components.some((c) => c.type === 'selectMenu');
+        if (hasButton && hasSelect) {
+            throw new Error(
+                'Discord does not allow mixing buttons and select menus in the same ActionRow.',
+            );
+        }
+
         const actionRow = new ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>();
 
         for (const comp of row.components) {

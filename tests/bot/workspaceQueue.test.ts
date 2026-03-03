@@ -62,6 +62,12 @@ describe('WorkspaceQueue', () => {
             const bEndIdx = timeline.indexOf('b-end');
             const aEndIdx = timeline.indexOf('a-end');
 
+            // Ensure all events were recorded
+            expect(aStartIdx).toBeGreaterThanOrEqual(0);
+            expect(bStartIdx).toBeGreaterThanOrEqual(0);
+            expect(bEndIdx).toBeGreaterThanOrEqual(0);
+            expect(aEndIdx).toBeGreaterThanOrEqual(0);
+
             expect(aStartIdx).toBeLessThanOrEqual(1);
             expect(bStartIdx).toBeLessThanOrEqual(1);
             expect(bEndIdx).toBeLessThan(aEndIdx);
@@ -83,6 +89,14 @@ describe('WorkspaceQueue', () => {
             });
 
             expect(executed).toEqual([2, 3]);
+        });
+
+        it('cleans up queue entry after the last task in the chain completes', async () => {
+            await queue.enqueue('/ws/cleanup', async () => {});
+
+            // After the promise resolves, the queue entry should be removed
+            // Access internal state to verify cleanup
+            expect(queue.getDepth('/ws/cleanup')).toBe(0);
         });
 
         it('catches and logs task errors without rejecting the returned promise', async () => {
