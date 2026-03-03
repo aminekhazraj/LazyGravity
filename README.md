@@ -60,7 +60,7 @@ npx lazy-gravity
 
 3. **Project Management (Channel-Directory Binding)**
    - **Discord**: Use `/project` to bind a channel to a local project directory via an interactive select menu.
-   - **Telegram**: Bind a chat to a workspace via `TelegramBindingRepository` (command UI coming soon).
+   - **Telegram**: Use `/project` to bind a chat to a workspace directory.
    - Messages sent in a bound channel/chat are automatically forwarded to Antigravity with the correct project context.
 
 4. **Context-Aware Replies**
@@ -101,6 +101,25 @@ Just type in any bound channel:
 - `🏓 /ping` — Check bot latency
 - `🧹 /cleanup [days]` — Scan and clean up inactive session channels (default: 7 days)
 - `❓ /help` — Display list of available commands
+
+### Telegram Commands
+
+Telegram commands use underscores instead of subcommand syntax (Telegram does not allow hyphens or spaces in command names).
+
+- `/project` — Manage workspace bindings (list, select, create)
+- `/project_create <name>` — Create a new workspace directory
+- `/template` — List prompt templates with execute buttons
+- `/template_add <name> <prompt>` — Add a new prompt template
+- `/template_delete <name>` — Delete a prompt template
+- `/mode` — Switch execution mode
+- `/model` — Switch LLM model
+- `/screenshot` — Capture Antigravity screenshot
+- `/autoaccept [on|off]` — Toggle auto-accept mode
+- `/logs [count]` — Show recent log entries
+- `/stop` — Interrupt active LLM generation
+- `/status` — Show bot status and connections
+- `/ping` — Check bot latency
+- `/help` — Show available commands
 
 ### CLI Commands
 
