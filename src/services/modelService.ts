@@ -1,9 +1,10 @@
 import { t } from "../utils/i18n";
 
 /**
- * Available LLM models
- * Aligned with models selectable in the Antigravity (Cursor fork) UI
- * Note: Models may change with Antigravity version updates
+ * Fallback model list used when CDP is not connected.
+ * NOT used for validation — CDP is the sole source of truth
+ * for available models. This list may become stale after
+ * Antigravity updates.
  */
 export const AVAILABLE_MODELS = [
     'gemini-3.1-pro-high',
@@ -14,16 +15,19 @@ export const AVAILABLE_MODELS = [
     'gpt-oss-120b-medium'
 ] as const;
 
-/** Default LLM model */
-export const DEFAULT_MODEL: Model = 'gemini-3-flash';
+/** Default LLM model (initial value before CDP connects) */
+export const DEFAULT_MODEL = 'gemini-3-flash';
 
-/** Model type definition */
-export type Model = typeof AVAILABLE_MODELS[number];
+/**
+ * Model type — plain string. CDP is the source of truth for
+ * valid model names; we do not restrict to AVAILABLE_MODELS.
+ */
+export type Model = string;
 
 /** Model set result type definition */
 export interface ModelSetResult {
     success: boolean;
-    model?: Model;
+    model?: string;
     error?: string;
 }
 
@@ -36,16 +40,20 @@ export interface DefaultModelSetResult {
 /**
  * Service class for managing LLM models.
  * Handles model switching via the /model command.
+ *
+ * Model validation is intentionally NOT performed here.
+ * The actual model list is dynamic (fetched from CDP via
+ * cdp.getUiModels()), so setModel() accepts any string.
  */
 export class ModelService {
-    private currentModel: Model = DEFAULT_MODEL;
+    private currentModel: string = DEFAULT_MODEL;
     private defaultModel: string | null = null;
     private pendingSync: boolean = false;
 
     /**
      * Get the current LLM model
      */
-    public getCurrentModel(): Model {
+    public getCurrentModel(): string {
         return this.currentModel;
     }
 
@@ -64,7 +72,10 @@ export class ModelService {
     }
 
     /**
-     * Switch LLM model
+     * Switch LLM model.
+     * Accepts any model name — validation happens at the CDP layer
+     * (cdp.setUiModel) against the live model list.
+     *
      * @param modelName Model name to set (case-insensitive)
      * @param synced Whether the model has been synced to Antigravity (default: false)
      */
@@ -72,20 +83,11 @@ export class ModelService {
         if (!modelName || modelName.trim() === '') {
             return {
                 success: false,
-                error: t('⚠️ Model name not specified. Available models: ') + AVAILABLE_MODELS.join(', '),
+                error: t('⚠️ Model name not specified.'),
             };
         }
 
-        const normalized = modelName.trim().toLowerCase() as Model;
-
-        if (!AVAILABLE_MODELS.includes(normalized)) {
-            return {
-                success: false,
-                error: t(`⚠️ Invalid model "${modelName}". Available models: ${AVAILABLE_MODELS.join(', ')}`),
-            };
-        }
-
-        this.currentModel = normalized;
+        this.currentModel = modelName.trim().toLowerCase();
         this.pendingSync = !synced;
         return {
             success: true,
@@ -94,14 +96,15 @@ export class ModelService {
     }
 
     /**
-     * Get the list of available models
+     * Get the fallback list of available models.
+     * Prefer cdp.getUiModels() when CDP is connected.
      */
     public getAvailableModels(): readonly string[] {
         return AVAILABLE_MODELS;
     }
 
     /**
-     * Get the default model name (free-text, may not match AVAILABLE_MODELS)
+     * Get the default model name (free-text, may not match current CDP models)
      */
     public getDefaultModel(): string | null {
         return this.defaultModel;

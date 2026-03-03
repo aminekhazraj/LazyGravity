@@ -27,11 +27,11 @@ describe('ModelService', () => {
             expect(modelService.getCurrentModel()).toBe('gemini-3.1-pro-high');
         });
 
-        it('returns an error and does not change the model for an invalid model name', () => {
-            const result = modelService.setModel('invalid_model');
-            expect(result.success).toBe(false);
-            expect(result.error).toBeDefined();
-            expect(modelService.getCurrentModel()).toBe(DEFAULT_MODEL);
+        it('accepts any model name (validation is at CDP layer)', () => {
+            const result = modelService.setModel('brand-new-model-2026');
+            expect(result.success).toBe(true);
+            expect(result.model).toBe('brand-new-model-2026');
+            expect(modelService.getCurrentModel()).toBe('brand-new-model-2026');
         });
 
         it('sets the model case-insensitively', () => {
@@ -134,24 +134,11 @@ describe('ModelService', () => {
         });
     });
 
-    describe('getAvailableModels - get available model list', () => {
-        it('returns the list of available models', () => {
+    describe('getAvailableModels - fallback model list', () => {
+        it('returns the fallback list of available models', () => {
             const models = modelService.getAvailableModels();
             expect(models).toEqual(AVAILABLE_MODELS);
             expect(models.length).toBeGreaterThan(0);
-        });
-
-        it('includes claude-sonnet-4.6-thinking, gpt-oss-120b-medium, and gemini-3.1-pro-high in the list', () => {
-            const models = modelService.getAvailableModels();
-            expect(models).toContain('claude-sonnet-4.6-thinking');
-            expect(models).toContain('gpt-oss-120b-medium');
-            expect(models).toContain('gemini-3.1-pro-high');
-        });
-
-        it('includes claude-opus-4.6-thinking and gemini-3-flash in the list', () => {
-            const models = modelService.getAvailableModels();
-            expect(models).toContain('claude-opus-4.6-thinking');
-            expect(models).toContain('gemini-3-flash');
         });
     });
 });
