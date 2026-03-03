@@ -104,6 +104,24 @@ describe('markdownToTelegramHtml', () => {
         expect(markdownToTelegramHtml('**bold**')).toBe('<b>bold</b>');
     });
 
+    it('converts # heading to bold', () => {
+        expect(markdownToTelegramHtml('# Title')).toContain('<b>Title</b>');
+    });
+
+    it('converts ### heading to bold', () => {
+        expect(markdownToTelegramHtml('### 1. Business Idea Validation')).toContain(
+            '<b>1. Business Idea Validation</b>',
+        );
+    });
+
+    it('converts multiple headings in multiline text', () => {
+        const input = '## Overview\nSome text\n### Details';
+        const result = markdownToTelegramHtml(input);
+        expect(result).toContain('<b>Overview</b>');
+        expect(result).toContain('<b>Details</b>');
+        expect(result).toContain('Some text');
+    });
+
     it('handles plain text without markdown', () => {
         expect(markdownToTelegramHtml('just plain text')).toBe('just plain text');
     });

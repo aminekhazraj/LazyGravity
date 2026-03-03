@@ -55,7 +55,17 @@ export class TelegramAdapter implements PlatformAdapter {
             this.registerHandlers();
             this.handlersRegistered = true;
         }
-        this.bot.start();
+        // bot.start() returns a Promise that resolves when polling stops.
+        // We intentionally do NOT await it (would block forever).
+        // Catch errors to prevent unhandled promise rejections (e.g. getMe()
+        // failure inside grammY's init phase).
+        const startPromise = this.bot.start();
+        if (startPromise && typeof (startPromise as any).catch === 'function') {
+            (startPromise as Promise<void>).catch((err: unknown) => {
+                logger.error('[TelegramAdapter] Polling loop error:', err instanceof Error ? err.message : err);
+                this.emitError(err);
+            });
+        }
         this.started = true;
 
         if (this.events.onReady) {

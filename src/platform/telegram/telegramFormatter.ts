@@ -46,6 +46,13 @@ export function markdownToTelegramHtml(text: string): string {
         (_match, code: string) => `<pre>${escapeHtml(code.trim())}</pre>`,
     );
 
+    // Markdown headings (# ... ######) -> bold text
+    // Telegram has no heading tags, so we convert to <b>bold</b>
+    result = result.replace(
+        /^(#{1,6})\s+(.+)$/gm,
+        (_match, _hashes: string, content: string) => `\n<b>${content}</b>`,
+    );
+
     // Inline code (`...`)
     result = result.replace(
         /`([^`]+)`/g,

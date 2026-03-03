@@ -24,7 +24,7 @@ import { richContentToHtml, markdownToTelegramHtml } from './telegramFormatter';
 // ---------------------------------------------------------------------------
 
 export interface TelegramBotLike {
-    start(): void;
+    start(): void | Promise<void>;
     stop(): void;
     on(event: string, handler: (...args: any[]) => any): void;
     api: {

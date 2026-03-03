@@ -1148,7 +1148,19 @@ export const startBot = async (cliLogLevel?: LogLevel) => {
     if (config.platforms.includes('telegram') && config.telegramToken) {
         try {
             const telegramBot = new Bot(config.telegramToken);
-            const botInfo = await telegramBot.api.getMe();
+            // Retry getMe() up to 3 times to handle transient network failures
+            const botInfo = await (async () => {
+                for (let attempt = 1; attempt <= 3; attempt++) {
+                    try {
+                        return await telegramBot.api.getMe();
+                    } catch (err: any) {
+                        if (attempt === 3) throw err;
+                        logger.warn(`[Telegram] getMe() failed (attempt ${attempt}/3): ${err?.message ?? err}. Retrying in 3s...`);
+                        await new Promise(r => setTimeout(r, 3000));
+                    }
+                }
+                throw new Error('getMe() failed after 3 attempts');
+            })();
 
             const telegramBindingRepo = new TelegramBindingRepository(db);
             const telegramAdapter = new TelegramAdapter(telegramBot as any, String(botInfo.id));
