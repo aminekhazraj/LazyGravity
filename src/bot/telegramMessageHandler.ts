@@ -256,10 +256,14 @@ export function createTelegramMessageHandler(deps: TelegramMessageHandlerDeps) {
                 const TIMEOUT_MS = 300_000;
 
                 let settled = false;
+                let lastProcessLogAt = Date.now();
+                let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+
                 const settle = () => {
                     if (settled) return;
                     settled = true;
                     clearTimeout(safetyTimer);
+                    if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
                     deps.activeMonitors?.delete(projectName);
                     resolve();
                 };
@@ -272,6 +276,7 @@ export function createTelegramMessageHandler(deps: TelegramMessageHandlerDeps) {
                     extractionMode: deps.extractionMode,
 
                     onProcessLog: (logText) => {
+                        lastProcessLogAt = Date.now();
                         if (logText && logText.trim().length > 0) {
                             lastActivityLogText = processLogBuffer.append(logText);
                         }
@@ -359,6 +364,21 @@ export function createTelegramMessageHandler(deps: TelegramMessageHandlerDeps) {
                     logger.error(`[TelegramHandler:${projectName}] monitor.start() failed:`, err?.message || err);
                     settle();
                 });
+
+                // Heartbeat: update status every 10s during silent phases
+                heartbeatTimer = setInterval(() => {
+                    if (settled || !statusMsg) return;
+                    const silenceMs = Date.now() - lastProcessLogAt;
+                    if (silenceMs >= 10_000) {
+                        const elapsed = Math.round((Date.now() - startTime) / 1000);
+                        const base = lastActivityLogText
+                            ? escapeHtml(lastActivityLogText)
+                            : 'Processing...';
+                        statusMsg.edit({
+                            text: `${base}\n\n⏳ Still working... ${elapsed}s`,
+                        }).catch(() => {});
+                    }
+                }, 10_000);
             });
         });
     };

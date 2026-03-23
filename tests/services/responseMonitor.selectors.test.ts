@@ -181,27 +181,28 @@ describe('Lean RESPONSE_SELECTORS', () => {
     });
 
     // ---------------------------------------------------------------
-    // Test 19b: RESPONSE_TEXT excludes .notify-user-container
+    // Test 19b: RESPONSE_TEXT does NOT exclude .notify-user-container
+    // (notify_user content must be extractable for response delivery)
     // ---------------------------------------------------------------
-    it('RESPONSE_TEXT script excludes .notify-user-container via isInsideExcludedContainer', () => {
+    it('RESPONSE_TEXT script does NOT exclude .notify-user-container', () => {
         const script = RESPONSE_SELECTORS.RESPONSE_TEXT;
-        expect(script).toContain('.notify-user-container');
+        expect(script).not.toContain('.notify-user-container');
     });
 
     // ---------------------------------------------------------------
-    // Test 19c: DUMP_ALL_TEXTS excludes .notify-user-container
+    // Test 19c: DUMP_ALL_TEXTS does NOT exclude .notify-user-container
     // ---------------------------------------------------------------
-    it('DUMP_ALL_TEXTS script excludes .notify-user-container', () => {
+    it('DUMP_ALL_TEXTS script does NOT exclude .notify-user-container', () => {
         const script = RESPONSE_SELECTORS.DUMP_ALL_TEXTS;
-        expect(script).toContain('.notify-user-container');
+        expect(script).not.toContain('.notify-user-container');
     });
 
     // ---------------------------------------------------------------
-    // Test 19d: PROCESS_LOGS excludes .notify-user-container
+    // Test 19d: PROCESS_LOGS does NOT exclude .notify-user-container
     // ---------------------------------------------------------------
-    it('PROCESS_LOGS script excludes .notify-user-container', () => {
+    it('PROCESS_LOGS script does NOT exclude .notify-user-container', () => {
         const script = RESPONSE_SELECTORS.PROCESS_LOGS;
-        expect(script).toContain('.notify-user-container');
+        expect(script).not.toContain('.notify-user-container');
     });
 
     // ---------------------------------------------------------------
